@@ -58,4 +58,42 @@ public class Passerelle {
         }
     }
 
-    
+    public static class DataReceiverServlet extends HttpServlet {
+        @Override
+        protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+            String temperature = request.getParameter("temperature");
+            receivedTemperatures.add(temperature);
+            response.sendRedirect("/display");
+        }
+    }
+
+    public static class DisplayServlet extends HttpServlet {
+        @Override
+        protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+            response.setContentType("text/html");
+            response.setStatus(HttpServletResponse.SC_OK);
+            
+            response.getWriter().println("<html><body>");
+            response.getWriter().println("<h1>Temperatures recues:</h1>");
+            response.getWriter().println("<ul>");
+            for (String temp : receivedTemperatures) {
+                response.getWriter().println("<li>" + temp + "</li>");
+            }
+            response.getWriter().println("</ul>");
+            response.getWriter().println("<form method='post' action='/display'>");
+            response.getWriter().println("<input type='submit' value='Envoyer la derniere temperature a MQTT'/>");
+            response.getWriter().println("</form>");
+            response.getWriter().println("</body></html>");
+        }
+
+        @Override
+        protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+            if (!receivedTemperatures.isEmpty()) {
+                String lastTemperature = receivedTemperatures.get(receivedTemperatures.size() - 1);
+                publishToMqtt(lastTemperature);
+            }
+            response.sendRedirect("/display");
+        }
+    }
+
+   
