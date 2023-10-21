@@ -96,4 +96,16 @@ public class Passerelle {
         }
     }
 
-   
+    public static void publishToMqtt(String temperature) {
+        try {
+            MqttMessage message = new MqttMessage();
+            message.setPayload(temperature.getBytes());
+            
+            client.publish(TOPIC, message);
+            System.out.println("Message publié !");
+            
+        } catch (MqttException e) {
+            e.printStackTrace();
+        }
+    }
+}  
